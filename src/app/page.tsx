@@ -20,9 +20,9 @@ export default function Home() {
       console.error('reCAPTCHA site key is not defined');
       return;
     }
-
-    // Load reCAPTCHA v3 script and execute it
-    const loadReCaptchaScript = () => {
+  
+    // Load reCAPTCHA v3 script and execute it only if recaptchaToken is not set
+    if (!recaptchaToken) {
       const script = document.createElement('script');
       script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
       script.onload = () => {
@@ -32,15 +32,16 @@ export default function Home() {
               .execute(siteKey, { action: 'submit' })
               .then((token) => {
                 setRecaptchaToken(token);
+              })
+              .catch((error) => {
+                console.error('reCAPTCHA error:', error);
               });
           });
         }
       };
       document.body.appendChild(script);
-    };
-
-    loadReCaptchaScript();
-  }, []);
+    }
+  }, [recaptchaToken]);
 
   const mutation = useMutation(
     async (formData: { email: string; recaptchaToken: string | null }) => {
